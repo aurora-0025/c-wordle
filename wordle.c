@@ -30,10 +30,10 @@ int checkWord(char* word)
 void getRandomWord(char* word)
 {
     srand(time(NULL));
-    int randomnumber = rand() % 1017 + 1;
+    int randomnumber = rand() % 1018;
     FILE *fp;
     fp=fopen("answers.txt", "r");
-    fseek(fp, randomnumber * 7, SEEK_SET);
+    fseek(fp, randomnumber * 6, SEEK_SET);
     fgets (word, 6, fp);
     fclose(fp);
 }
@@ -43,44 +43,35 @@ int wordle(char guessWord[], char word[])
 
     char arr1[6];
     char arr2[6];
+    char result[6][30];
     strcpy(arr1, guessWord);
     strcpy(arr2, word);
     int count = 0;
-    int f = 0;
     for (int i = 0; i < 5; i++)
     {
-    f = 0;    
+        sprintf(result[i], "\033[1;97;100m %c \033[0m", arr1[i]);
+        if(arr1[i] == arr2[i]) {
+            count++;
+            sprintf(result[i], "\033[1;97;42m %c \033[0m", arr1[i]);
+            arr1[i] = '1';
+            arr2[i] = '0';
+        }
+    }
+
+    for (int i = 0; i < 5; i++)
+    {
         for (int j = 0; j < 5; j++)
         {
             if(arr1[i] == arr2[j]){
-                if(i == j) {
-                    count++;
-                    arr1[i] = "1";
-                    arr2[i] = "0";
-                    f = 1;
-                    break;
-                }
-                else {
-                    arr2[j] = "0";
-                    f = 2;
-                }
+                sprintf(result[i], "\033[1;97;43m %c \033[0m", arr1[i]);
             }
         }
-        switch (f)
-        {
-        case 0:
-            printf("\033[1;97;100m %c \033[0m ", guessWord[i]); //GRAY BOX
-            break;
-        case 1:
-            printf("\033[1;97;102m %c \033[0m ", guessWord[i]); //GREEN BOX
-            break;
-        case 2:
-            printf("\033[1;97;103m %c \033[0m ", guessWord[i]); //YELLOW BOX
-            break;
-        default:
-            break;
-        }
     }
+    for (int i = 0; i < 5; i++)
+    {
+        printf("%s", result[i]);
+    }
+    
     if(count == 5) return 1;
     return 0;
 }
@@ -89,29 +80,29 @@ int wordle(char guessWord[], char word[])
 void main() {
     int turn=0;
     char guess[10];
-    char guessWord[6];
+    char answer[6];
 
-    getRandomWord(guessWord);
+    getRandomWord(answer);
     printf("\033[1;96m====================\033[0m\n");
     printf("\033[1;96m|     C-WORDLE     |\033[0m\n");
     printf("\033[1;96m====================\033[0m\n");
     while(turn<5) {
         turn+=1;
         printf("Enter guess %d: ", turn);
-        scanf("%s", &guess);
+        scanf("%s", guess);
         if(checkWord(guess) == 1)
         {
             printf("\033[1;91mInvalid word!\033[0m");
             turn--;
         }
-        else if(wordle(guess, guessWord) == 1)
+        else if(wordle(guess, answer) == 1)
         {
-            printf("\n\033[1;96mYou Found The Word in your %d guess(es)!\033[0m", turn);
+            printf("\n\033[1;96mYou Found The Word in your %d guess(es)!\033[0m\n", turn);
             break;
         }
         else if(turn == 5)
         {
-            printf("\n\033[1;91mYou failed, get rekt bozo!\nThe word was %s\033[0m", guessWord);
+            printf("\n\033[1;91mYou failed, get rekt bozo!\nThe word was %s\033[0m\n", answer);
             break;
         }
         printf("\n");
